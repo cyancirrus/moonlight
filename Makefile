@@ -36,12 +36,12 @@ release: $(SRC)
 	$(NVCC) $(NVCC_RELEASE_FLAGS) $< -o $(RELEASE)/$(APPLICATION_NAME)
 
 memcheck: $(TARGET)
-	compute-sanitizer --tool memcheck ./$(TARGET)
+	compute-sanitizer --tool memcheck $(RELEASE)/$(APPLICATION_NAME)
 
 racecheck: $(TARGET)
-	compute-sanitizer --tool racecheck ./$(TARGET)
+	compute-sanitizer --tool racecheck $(RELEASE)/$(APPLICATION_NAME)
 
-diagnostics: run memcheck racecheck
+diagnostics: release memcheck racecheck
 
 clean:
-	rm -f $(TARGET) $(RELEASE)
+	rm -f $(TARGET) $(RELEASE)/$(APPLICATION_NAME)
