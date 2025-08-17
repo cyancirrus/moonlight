@@ -9,6 +9,8 @@ NVCC_DEVELOP_FLAGS := -arch=$(ARCH) \
 			  -O1 \
 			  -g -G \
 			  -Xcompiler -fsanitize=address \
+			  -Xcompiler -fsanitize=undefined \
+			  -Xcompiler -fsanitize=leak \
 			  -Wno-deprecated-gpu-targets
 
 NVCC_RELEASE_FLAGS := -arch=$(ARCH) \
