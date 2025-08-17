@@ -14,7 +14,6 @@ __global__ void add(int n, float *x, float *y) {
 
 __global__ void scale(int n, float c, float *x) {
 	int i = blockIdx.x * blockDim.x + threadIdx.x;
-	// if ( i < n ) x[i] = x[i] * c;
 	if ( i < n ) x[i] = x[i] * c;
 }
 
@@ -30,11 +29,6 @@ bool scale_item(void) {
 	int numBlocks = (N + blockSize - 1) / blockSize;
 	
 	scale<<<numBlocks, blockSize>>>(N, c, d_x);
-	cudaError_t err = cudaGetLastError();
-    if (err != cudaSuccess) {
-        std::cerr << "Kernel launch error: " << cudaGetErrorString(err) << "\n";
-    }
-    cudaDeviceSynchronize();
 	cudaMemcpy(x.data(), d_x, N*sizeof(float), cudaMemcpyDeviceToHost);
 	cudaFree(d_x);
 
@@ -42,6 +36,11 @@ bool scale_item(void) {
 	std::cout << "scaler should be 2*pi = " << x[N-10] << "\n";
 	return true;
 }
+
+// void scale_vector(int size, float c, float *x) {
+// 	scale<<numBloc	
+
+// }
 
 int add_print(void) {
 	int N = 1<<20;
