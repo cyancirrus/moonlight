@@ -1,28 +1,39 @@
 ARCH := sm_75
 
+APPLICATION_NAME := moonlight
+VERSION := 0.0.0
+
 # Compiler 
 NVCC := nvcc
-# NVCC_FLAGS := -arch=$(ARCH) -Wno-deprecated-gpu-targets -O2
-NVCC_FLAGS := -arch=$(ARCH) \
-			  -O2 \
-			  -Xcompiler\
-			  -fsanitize=address \
-			  -g \
-			  -Wno-deprecated-gpu-targets \
+NVCC_DEVELOP_FLAGS := -arch=$(ARCH) \
+			  -O1 \
+			  -g -G \
+			  -Xcompilere-fsanitize=address \
+			  -Wno-deprecated-gpu-targets
+
+NVCC_RELEASE_FLAGS := -arch=$(ARCH) \
+					  -O2 \
+					  -Wno-deprecated-gpu-targets \
 
 # Targets
 BUILD_DIR := target
-TARGET := $(BUILD_DIR)/main
+RELEASE_DIR := build
 SRC := main.cu
+TARGET := $(BUILD_DIR)/$(APPLICATION_NAME)
+RELEASE := $(RELEASE_DIR)/$(APPLICATION_NAME)-$(VERSION)
 
 all: $(TARGET)
 
 $(TARGET): $(SRC)
 	mkdir -p $(BUILD_DIR)
-	$(NVCC) $(NVCC_FLAGS) $< -o $@
+	$(NVCC) $(NVCC_DEVELOP_FLAGS) $< -o $@
 
 run: $(TARGET)
 	./$(TARGET)
+
+release: $(SRC)
+	mkdir -p $(RELEASE_DIR)
+	$(NVCC) $(NVCC_RELEASE_FLAGS) $< -o $@
 
 memcheck: $(TARGET)
 	compute-sanitizer --tool memcheck ./$(TARGET)
@@ -30,5 +41,7 @@ memcheck: $(TARGET)
 racecheck: $(TARGET)
 	compute-sanitizer --tool racecheck ./$(TARGET)
 
+diagnostics: run memcheck racecheck
+
 clean:
-	rm -f ./target/$(TARGET)
+	rm -f $(TARGET) $(RELEASE)
