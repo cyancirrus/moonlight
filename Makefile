@@ -8,7 +8,7 @@ NVCC := nvcc
 NVCC_DEVELOP_FLAGS := -arch=$(ARCH) \
 			  -O1 \
 			  -g -G \
-			  -Xcompilere-fsanitize=address \
+			  -Xcompiler -fsanitize=address \
 			  -Wno-deprecated-gpu-targets
 
 NVCC_RELEASE_FLAGS := -arch=$(ARCH) \
@@ -33,7 +33,7 @@ run: $(TARGET)
 
 release: $(SRC)
 	mkdir -p $(RELEASE_DIR)
-	$(NVCC) $(NVCC_RELEASE_FLAGS) $< -o $@
+	$(NVCC) $(NVCC_RELEASE_FLAGS) $< -o $(RELEASE)/$(APPLICATION_NAME)
 
 memcheck: $(TARGET)
 	compute-sanitizer --tool memcheck ./$(TARGET)
