@@ -9,8 +9,7 @@ BUILD_DIR := target
 TARGET := $(BUILD_DIR)/vector_add
 SRC := vector_add.cu
 
-all: 
-	$(TARGET)
+all: $(TARGET)
 
 $(TARGET): $(SRC)
 	mkdir -p $(BUILD_DIR)
