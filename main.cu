@@ -58,14 +58,16 @@ float pipeline(
 	cudaMalloc(&d_x, n * sizeof(float));
 	cudaMalloc(&d_y, n * sizeof(float));
 
-	cudaMemcpy(d_r, &result, sizeof(float), cudaMemcpyHostToDevice);
+
+	// cudaMemcpy(d_r, &result, sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_x, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_y, y.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
 
 	add<<<blocks, BLOCKSIZE>>>(n, d_x, d_y);
 	scale<<<blocks, BLOCKSIZE>>>(n, c, d_y);
-	reduce_sum_atomic<<<blocks, BLOCKSIZE>>>(n, d_y, d_r);
-	cudaMemcpy(&result, d_r, sizeof(float), cudaMemcpyDeviceToHost);
+	// reduce_sum_atomic<<<blocks, BLOCKSIZE>>>(n, d_y, d_r);
+	// cudaMemcpy(&result, d_r, sizeof(float), cudaMemcpyDeviceToHost);
 	cudaFree(d_x);
 	cudaFree(d_y);
 	cudaFree(d_r);
