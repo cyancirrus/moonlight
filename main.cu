@@ -76,7 +76,7 @@ float pipeline(
 }
 
 void predict_input(void) {
-	int N = 1<<20;
+	int N = 1<<16;
 	float c = 3.14f;
 	float r = 0.0f;
 	vector<float> x(N, 2.0f);
