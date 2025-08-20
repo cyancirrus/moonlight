@@ -30,7 +30,7 @@ void predict_input(void) {
 }
 
 
-vector<float> mat_mul(
+vector<float> mat_mul_inner(
 	int i, int j, int k,
 	const vector<float> &x,
 	const vector<float> &y
@@ -38,14 +38,32 @@ vector<float> mat_mul(
 	vector<float>  r(i * j, 0.0f);
 		
 	for (int idx = 0; idx < i; idx ++) {
-		for (int kdx = 0; kdx < k; kdx ++) {
-			for (int jdx = 0; jdx < j; jdx ++ ) {
+		for (int jdx = 0; jdx < j; jdx ++ ) {
+			for (int kdx = 0; kdx < k; kdx ++) {
 				r[idx * j + jdx] += x[idx * k + kdx] * y[kdx * j + jdx];
 			}
 		}
 	}
 	return r;
 }
+
+vector<float> mat_mul_outer(
+	int i, int j, int k,
+	const vector<float> &x,
+	const vector<float> &y
+) {
+	vector<float> r(i * j, 0.0f);
+	for (int kdx = 0; kdx < k; kdx++) {
+		for (int idx = 0; idx < i; idx++) {
+			for (int jdx = 0; jdx < j; jdx++) {
+				r[ idx * j + jdx] += x[ idx * k + kdx] * y[ kdx * j + jdx];
+			}
+		}
+	}
+
+	return r;
+}
+
 
 int main(void) {
 	// predict_input();
@@ -54,7 +72,8 @@ int main(void) {
     vector<float> y{5.0, 6.0,
                     7.0, 8.0};  // shape 2x2
 
-    vector<float> r = mat_mul(2, 2, 2, x, y);
+    vector<float> r = mat_mul_outer(2, 2, 2, x, y);
+    // vector<float> r = mat_mul_inner(2, 2, 2, x, y);
 
     std::cout << "matrix\n";
     std::cout << r[0] << ", " << r[1] << "\n";
