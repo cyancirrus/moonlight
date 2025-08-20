@@ -35,8 +35,6 @@ __global__ void mat_mul_kernel(
 	}
 }
 
-
-
 // __global__ void mat_mul_kernel(
 // 	int i, int j, int k,
 // 	const float *x,
@@ -64,10 +62,8 @@ vector<float> mat_mul_host(
 	cudaMalloc(&d_y, j * k *  sizeof(float));
 	cudaMalloc(&d_o, i * j * sizeof(float));
 
-	cudaMemset(d_o, 0, i * j * sizeof(float));
 	cudaMemcpy(d_x, x.data(), i * k * sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_y, y.data(), j * k * sizeof(float), cudaMemcpyHostToDevice);
-	// cudaMemcpy(d_o, o.data(), i * j * sizeof(float), cudaMemcpyHostToDevice);
 
 	int blocks = k;
 	dim3 threads(16, 16);
