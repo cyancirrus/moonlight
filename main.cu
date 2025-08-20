@@ -114,11 +114,10 @@ float pipeline(
 void predict_input(void) {
 	int N = 1<<20;
 	float c = 3.14f;
-	float r = 0.0f;
 	vector<float> x(N, 2.0f);
 	vector<float> y(N, 2.71f);
 
-	r = pipeline(N, c, x, y );
+	float r = pipeline(N, c, x, y );
 	std::cout << "total = " << r << "\n";
 
 	// std::cout << "y[0] = " << y[0] << "\n";
