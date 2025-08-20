@@ -22,8 +22,9 @@ __global__ void mat_mul_kernel(
 	const float *y,
 	float *out
 ) {
-	int row = blockIdx.y * blockDim.y + threadIdx.y;
-	int col = blockIdx.x * blockDim.x + threadIdx.x;
+	int tid = blockIdx.x * blockDim.x + threadIdx.x;
+	int row = tid / j;
+	int col = tid % j;
 	
 	if (row < i && col < j) {
 		float sum = 0.0f;
