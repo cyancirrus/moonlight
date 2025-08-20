@@ -21,7 +21,39 @@ __global__ void scale(int n, float c, float *x) {
 	if ( i < n ) x[i] = x[i] * c;
 }
 
-// __global__ void reduce_sum_atomic(int n, float *in, float *out) {
+__global__ void reduce_sum(int n, const float *in, 	float *out) {
+	__shared__ float smem[BLOCKSIZE];
+	int i = blockIdx.x * blockDim.x + threadIdx.x;
+	int tid = threadIdx.x;
+	
+	smem[tid] = (i < n ? in[i] : 0.0f);
+	__syncthreads();
+
+	for (int stride=blockDim.x / 2; stride > 0; stride >>=1) {
+		if (tid < stride) {
+			smem[tid] += smem[tid + stride];
+		}
+		__syncthreads();
+	}; 
+
+	if (tid == 0 ) out[blockIdx.x] = smem[0];
+}
+
+__global__ void final_reduce(int n, const float *in, float *out) {
+	__shared__ float smem[BLOCKSIZE];
+	int i = threadIdx.x;
+	smem[i] = (i < n ? in[i]: 0.0f);
+	__syncthreads();
+
+	for (int stride=blockDim.x / 2; stride > 0; stride >>=1) {
+		if (i < stride) {
+			smem[i] += smem[i + stride];
+		}
+		__syncthreads();
+	}
+	if (i==0) *out = smem[0];
+}
+
 __global__ void reduce_sum_atomic(int n, float *in, float *global_sum) {
 	__shared__ float smem[BLOCKSIZE];
 	int i = blockIdx.x * blockDim.x + threadIdx.x;
@@ -42,6 +74,12 @@ __global__ void reduce_sum_atomic(int n, float *in, float *global_sum) {
 }
 
 
+float reduce_core(vector<float> *in) {
+	float r = 0.0f;
+	for (float v: *in) r += v;
+	return r;
+}
+
 float pipeline(
 	int n,
 	float c,
@@ -49,31 +87,28 @@ float pipeline(
 	vector<float>& y
 ) {
 	int blocks = (n + BLOCKSIZE - 1 ) / BLOCKSIZE;
-	float result = 0.0f;
-	float *d_x, *d_y, *d_r;
+	float *d_x, *d_y, *d_bs;
+	vector<float> bs(blocks);
 
-	cudaMalloc(&d_r, sizeof(float));
-	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
 	cudaMalloc(&d_x, n * sizeof(float));
 	cudaMalloc(&d_y, n * sizeof(float));
+	cudaMalloc(&d_bs, blocks*sizeof(float));
 
 
-	cudaMemcpy(d_r, &result, sizeof(float), cudaMemcpyHostToDevice);
-	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
 	cudaMemcpy(d_x, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_y, y.data(), n * sizeof(float), cudaMemcpyHostToDevice);
-	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
+	cudaError_t err = cudaGetLastError();
 
 	add<<<blocks, BLOCKSIZE>>>(n, d_x, d_y);
 	scale<<<blocks, BLOCKSIZE>>>(n, c, d_y);
-	reduce_sum_atomic<<<blocks, BLOCKSIZE>>>(n, d_y, d_r);
-	cudaMemcpy(&result, d_r, sizeof(float), cudaMemcpyDeviceToHost);
-	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
+	reduce_sum<<<blocks, BLOCKSIZE>>>(n, d_y, d_bs);
+	cudaMemcpy(bs.data(), d_bs, blocks * sizeof(float), cudaMemcpyDeviceToHost);
+	float r = reduce_core(&bs);
 	cudaFree(d_x);
 	cudaFree(d_y);
-	cudaFree(d_r);
+	cudaFree(d_bs);
 	
-	return result;
+	return r;
 }
 
 void predict_input(void) {
