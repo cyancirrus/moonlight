@@ -1,6 +1,6 @@
+#include "pipeline.h"
 #include <iostream>
 #include <vector>
-using std::vector;
 
 // warps <- a collection of threads
 // sharedMemBytes <- shareds
@@ -75,7 +75,7 @@ __global__ void reduce_sum_atomic(int n, float *in, float *global_sum) {
 }
 
 
-float reduce_core(vector<float> *in) {
+float reduce_core(std::vector<float> *in) {
 	float r = 0.0f;
 	for (float v: *in) r += v;
 	return r;
@@ -84,12 +84,12 @@ float reduce_core(vector<float> *in) {
 float pipeline(
 	int n,
 	float c,
-	vector<float>& x,
-	vector<float>& y
+	std::vector<float>& x,
+	std::vector<float>& y
 ) {
 	int blocks = (n + BLOCKSIZE - 1 ) / BLOCKSIZE;
 	float *d_x, *d_y, *d_bs;
-	vector<float> bs(blocks);
+	std::vector<float> bs(blocks);
 
 	cudaMalloc(&d_x, n * sizeof(float));
 	cudaMalloc(&d_y, n * sizeof(float));
@@ -110,21 +110,4 @@ float pipeline(
 	cudaFree(d_bs);
 	
 	return r;
-}
-
-void predict_input(void) {
-	int N = 1<<20;
-	float c = 3.14f;
-	vector<float> x(N, 2.0f);
-	vector<float> y(N, 2.71f);
-
-	float r = pipeline(N, c, x, y );
-	std::cout << "total = " << r << "\n";
-
-	// std::cout << "y[0] = " << y[0] << "\n";
-	// std::cout << "y[n-1] = " << y[N-1] << "\n";
-}
-
-int main(void) {
-	predict_input();
 }

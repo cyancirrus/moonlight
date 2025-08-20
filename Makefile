@@ -26,7 +26,7 @@ NVCC_RELEASE_FLAGS := -arch=$(ARCH) \
 # Targets
 BUILD_DIR := target
 RELEASE_DIR := build
-SRC := main.cu
+SRC := src/main.cu src/pipeline.cu
 TARGET := $(BUILD_DIR)/$(APPLICATION_NAME)
 RELEASE := $(RELEASE_DIR)/$(APPLICATION_NAME)-$(VERSION)
 
@@ -34,14 +34,14 @@ all: $(TARGET)
 
 $(TARGET): $(SRC)
 	mkdir -p $(BUILD_DIR)
-	$(NVCC) $(NVCC_CUDA_DEBUG_FLAGS) $< -o $@
+	$(NVCC) $(NVCC_CUDA_DEBUG_FLAGS) $^ -o $@
 
 run: $(TARGET)
 	./$(TARGET)
 
 release: $(SRC)
 	mkdir -p $(RELEASE_DIR)
-	$(NVCC) $(NVCC_RELEASE_FLAGS) $< -o $(RELEASE)/$(APPLICATION_NAME)
+	$(NVCC) $(NVCC_RELEASE_FLAGS) $^ -o $(RELEASE)/$(APPLICATION_NAME)
 
 memcheck: $(TARGET)
 	compute-sanitizer --tool memcheck $(RELEASE)/$(APPLICATION_NAME)
