@@ -23,12 +23,11 @@ __global__ void scale(int n, float c, float *x) {
 
 // __global__ void reduce_sum_atomic(int n, float *in, float *out) {
 __global__ void reduce_sum_atomic(int n, float *in, float *global_sum) {
-	// need to share how much memory extra argument
 	__shared__ float smem[BLOCKSIZE];
 	int i = blockIdx.x * blockDim.x + threadIdx.x;
 	int tid = threadIdx.x;
 
-	smem[tid] = (i < n ? in[i] : 0);
+	smem[tid] = (i < n ? in[i] : 0.0f);
 	__syncthreads();
 
 	for (int stride = blockDim.x / 2; stride > 0; stride >>= 1 ) {
@@ -37,7 +36,6 @@ __global__ void reduce_sum_atomic(int n, float *in, float *global_sum) {
 		}
 		__syncthreads();
 	}
-	// if (tid == 0) out[blockIdx.x] = smem[0];
 	if (tid == 0) {
 		atomicAdd(global_sum, smem[0]);
 	}
@@ -55,19 +53,22 @@ float pipeline(
 	float *d_x, *d_y, *d_r;
 
 	cudaMalloc(&d_r, sizeof(float));
+	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
 	cudaMalloc(&d_x, n * sizeof(float));
 	cudaMalloc(&d_y, n * sizeof(float));
 
 
-	// cudaMemcpy(d_r, &result, sizeof(float), cudaMemcpyHostToDevice);
-	cudaMemcpy(d_x, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_r, &result, sizeof(float), cudaMemcpyHostToDevice);
+	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
+	// cudaMemcpy(d_x, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_y, y.data(), n * sizeof(float), cudaMemcpyHostToDevice);
 	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
 
-	add<<<blocks, BLOCKSIZE>>>(n, d_x, d_y);
-	scale<<<blocks, BLOCKSIZE>>>(n, c, d_y);
-	// reduce_sum_atomic<<<blocks, BLOCKSIZE>>>(n, d_y, d_r);
-	// cudaMemcpy(&result, d_r, sizeof(float), cudaMemcpyDeviceToHost);
+	// add<<<blocks, BLOCKSIZE>>>(n, d_x, d_y);
+	// scale<<<blocks, BLOCKSIZE>>>(n, c, d_y);
+	reduce_sum_atomic<<<blocks, BLOCKSIZE>>>(n, d_y, d_r);
+	cudaMemcpy(&result, d_r, sizeof(float), cudaMemcpyDeviceToHost);
+	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
 	cudaFree(d_x);
 	cudaFree(d_y);
 	cudaFree(d_r);
@@ -76,7 +77,7 @@ float pipeline(
 }
 
 void predict_input(void) {
-	int N = 1<<16;
+	int N = 1<<3;
 	float c = 3.14f;
 	float r = 0.0f;
 	vector<float> x(N, 2.0f);

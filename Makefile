@@ -5,12 +5,18 @@ VERSION := 0.0.0
 
 # Compiler 
 NVCC := nvcc
-NVCC_DEVELOP_FLAGS := -arch=$(ARCH) \
+
+NVCC_HOST_DEBUG_FLAGS := -arch=$(ARCH) \
 			  -O1 \
 			  -g -G \
 			  -Xcompiler -fsanitize=address \
 			  -Xcompiler -fsanitize=undefined \
 			  -Xcompiler -fsanitize=leak \
+			  -Wno-deprecated-gpu-targets
+
+NVCC_CUDA_DEBUG_FLAGS := -arch=$(ARCH) \
+			  -O1 \
+			  -g -G \
 			  -Wno-deprecated-gpu-targets
 
 NVCC_RELEASE_FLAGS := -arch=$(ARCH) \
@@ -28,7 +34,7 @@ all: $(TARGET)
 
 $(TARGET): $(SRC)
 	mkdir -p $(BUILD_DIR)
-	$(NVCC) $(NVCC_DEVELOP_FLAGS) $< -o $@
+	$(NVCC) $(NVCC_CUDA_DEBUG_FLAGS) $< -o $@
 
 run: $(TARGET)
 	./$(TARGET)
