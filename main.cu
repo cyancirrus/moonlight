@@ -60,12 +60,12 @@ float pipeline(
 
 	cudaMemcpy(d_r, &result, sizeof(float), cudaMemcpyHostToDevice);
 	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
-	// cudaMemcpy(d_x, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
+	cudaMemcpy(d_x, x.data(), n * sizeof(float), cudaMemcpyHostToDevice);
 	cudaMemcpy(d_y, y.data(), n * sizeof(float), cudaMemcpyHostToDevice);
 	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
 
-	// add<<<blocks, BLOCKSIZE>>>(n, d_x, d_y);
-	// scale<<<blocks, BLOCKSIZE>>>(n, c, d_y);
+	add<<<blocks, BLOCKSIZE>>>(n, d_x, d_y);
+	scale<<<blocks, BLOCKSIZE>>>(n, c, d_y);
 	reduce_sum_atomic<<<blocks, BLOCKSIZE>>>(n, d_y, d_r);
 	cudaMemcpy(&result, d_r, sizeof(float), cudaMemcpyDeviceToHost);
 	std::cout << "Error? " << cudaGetErrorString(cudaGetLastError()) << "\n";
@@ -77,7 +77,7 @@ float pipeline(
 }
 
 void predict_input(void) {
-	int N = 1<<3;
+	int N = 1<<20;
 	float c = 3.14f;
 	float r = 0.0f;
 	vector<float> x(N, 2.0f);
