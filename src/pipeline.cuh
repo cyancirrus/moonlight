@@ -1,6 +1,7 @@
+#include <vector>
 #ifndef PIPELINE_H
 #define PIPELINE_H
-#include <vector> 
+
 float pipeline(
     int n,
     float c,

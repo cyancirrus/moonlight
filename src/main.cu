@@ -1,6 +1,6 @@
-#include <iostream>
 #include <vector>
-#include "pipeline.h"
+#include <iostream>
+#include "pipeline.cuh"
 using std::vector;
 
 // warps <- a collection of threads

@@ -1,5 +1,4 @@
-#include "pipeline.h"
-#include <iostream>
+#include "pipeline.cuh"
 #include <vector>
 
 // warps <- a collection of threads
