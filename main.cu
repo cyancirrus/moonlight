@@ -2,12 +2,13 @@
 #include <vector>
 using std::vector;
 
+// warps <- a collection of threads
+// sharedMemBytes <- shareds
 
 // threadIdx.x <- index of the thread inside the block
 // blockIdx.x <- index of the block in the grid
 // blockDim.x <- how many threads are in a block
 // gridDim.x <- how many blocks in the grid
-// sharedMemBytes
 
 constexpr int BLOCKSIZE = 256;
 
