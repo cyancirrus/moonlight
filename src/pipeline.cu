@@ -1,4 +1,4 @@
-#include "pipeline.cuh"
+#include "pipeline.h"
 #include <vector>
 
 // warps <- a collection of threads

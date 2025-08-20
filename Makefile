@@ -20,13 +20,13 @@ NVCC_CUDA_DEBUG_FLAGS := -arch=$(ARCH) \
 			  -Wno-deprecated-gpu-targets
 
 NVCC_RELEASE_FLAGS := -arch=$(ARCH) \
-					  -O2 \
-					  -Wno-deprecated-gpu-targets \
+			  -O2 \
+			  -Wno-deprecated-gpu-targets \
 
 # Targets
 BUILD_DIR := target
 RELEASE_DIR := build
-SRC := src/main.cu src/pipeline.cu
+SRC := src/main.cpp src/pipeline.cu
 TARGET := $(BUILD_DIR)/$(APPLICATION_NAME)
 RELEASE := $(RELEASE_DIR)/$(APPLICATION_NAME)-$(VERSION)
 

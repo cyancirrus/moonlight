@@ -1,5 +1,8 @@
 CompileFlags:
-  Add: [-x, cuda, --cuda-gpu-arch=sm_75]
+  CompilationDatabase: build
+  Add: [-std=c++17, -x, cuda, --cuda-gpu-arch=sm_75]
+
+# FallbackFlags: [-std=c++17]
 
 Compiler: clang++
 # Compiler: /usr/local/cuda/bin/nvcc
